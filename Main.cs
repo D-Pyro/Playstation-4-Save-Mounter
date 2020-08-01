@@ -195,9 +195,9 @@ namespace PS4Saves
            
             //PATCHES
             //SAVEDATA LIBRARY PATCHES
-            ps4.WriteMemory(pid, libSceSaveDataBase + 0x32998, (byte)0x00); // 'sce_' patch
-            ps4.WriteMemory(pid, libSceSaveDataBase + 0x31699, (byte)0x00); // 'sce_sdmemory' patch
-            ps4.WriteMemory(pid, libSceSaveDataBase + 0x01119, (byte)0x30); // '_' patch
+            ps4.WriteMemory(pid, libSceSaveDataBase + 0x00038AE8, (byte)0x00); // 'sce_' patch
+            ps4.WriteMemory(pid, libSceSaveDataBase + 0x000377D9, (byte)0x00); // 'sce_sdmemory' patch
+            ps4.WriteMemory(pid, libSceSaveDataBase + 0x00000ED7, (byte)0x30); // '_' patch
 
             var l = ps4.GetProcessList();
             var s = l.FindProcess("SceShellCore");
@@ -205,28 +205,28 @@ namespace PS4Saves
             var ex = m.FindEntry("executable");
             
             //SHELLCORE PATCHES
-            ps4.WriteMemory(s.pid, ex.start + 0xD42843, (byte)0x00); // 'sce_sdmemory' patch
-            ps4.WriteMemory(s.pid, ex.start + 0x7E4DC0, new byte[]{0x48, 0x31, 0xC0, 0xC3}); //verify keystone patch
-            ps4.WriteMemory(s.pid, ex.start + 0x68BA0, new byte[] {0x31, 0xC0, 0xC3}); //transfer mount permission patch eg mount foreign saves with write permission
-            ps4.WriteMemory(s.pid, ex.start + 0xC54F0, new byte[] { 0x31, 0xC0, 0xC3 });//patch psn check to load saves saves foreign to current account
-            ps4.WriteMemory(s.pid, ex.start + 0x6A349, new byte[] { 0x90, 0x90 }); // ^
-            ps4.WriteMemory(s.pid, ex.start + 0x686AE, new byte[] {0x90, 0x90, 0x90, 0x90, 0x90, 0x90}); // something something patches... 
-            ps4.WriteMemory(s.pid, ex.start + 0x67FCA, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }); // don't even remember doing this
-            ps4.WriteMemory(s.pid, ex.start + 0x67798, new byte[] { 0x90, 0x90}); //nevah jump
-            ps4.WriteMemory(s.pid, ex.start + 0x679D5, new byte[] { 0x90, 0xE9 }); //always jump
+            ps4.WriteMemory(s.pid, ex.start + 0x01600060, (byte)0x00); // 'sce_sdmemory' patch
+            ps4.WriteMemory(s.pid, ex.start + 0x0087F840, new byte[]{0x48, 0x31, 0xC0, 0xC3}); //verify keystone patch
+            ps4.WriteMemory(s.pid, ex.start + 0x00071130, new byte[] {0x31, 0xC0, 0xC3}); //transfer mount permission patch eg mount foreign saves with write permission
+            ps4.WriteMemory(s.pid, ex.start + 0x000D6830, new byte[] { 0x31, 0xC0, 0xC3 });//patch psn check to load saves saves foreign to current account
+            ps4.WriteMemory(s.pid, ex.start + 0x0007379E, new byte[] { 0x90, 0x90 }); // ^
+            ps4.WriteMemory(s.pid, ex.start + 0x00070C38, new byte[] {0x90, 0x90, 0x90, 0x90, 0x90, 0x90}); // something something patches... 
+            ps4.WriteMemory(s.pid, ex.start + 0x00070855, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }); // don't even remember doing this
+            ps4.WriteMemory(s.pid, ex.start + 0x00070054, new byte[] { 0x90, 0x90}); //nevah jump
+            ps4.WriteMemory(s.pid, ex.start + 0x00070260, new byte[] { 0x90, 0xE9 }); //always jump
             //WRITE CUSTOM FUNCTIONS
             GetSaveDirectoriesAddr = ps4.AllocateMemory(pid, 0x8000);
             ps4.WriteMemory(pid, GetSaveDirectoriesAddr, functions.GetSaveDirectories);
-            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x12, executableBase + 0x81E800); //opendir
-            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x20, executableBase + 0x81E810); //readdir
-            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x2E, executableBase + 0x81E7F0);//closedir
-            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x3C, libSceLibcInternalBase + 0x8B1A0); //strcpy
+            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x12, libSceLibcInternalBase + 0x000B3F40); //opendir
+            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x20, libSceLibcInternalBase + 0x000B4CE0); //readdir
+            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x2E, libSceLibcInternalBase + 0x000B2D20);//closedir
+            ps4.WriteMemory(pid, GetSaveDirectoriesAddr + 0x3C, libSceLibcInternalBase + 0x000C0A40); //strcpy
 
             GetUsersAddr = GetSaveDirectoriesAddr + (uint)functions.GetSaveDirectories.Length + 0x20;
             ps4.WriteMemory(pid, GetUsersAddr, functions.GetUsers);
             ps4.WriteMemory(pid, GetUsersAddr + 0x15, libSceUserServiceBase + offsets.sceUserServiceGetLoginUserIdList);
             ps4.WriteMemory(pid, GetUsersAddr + 0x23, libSceUserServiceBase + offsets.sceUserServiceGetUserName);
-            ps4.WriteMemory(pid, GetUsersAddr + 0x31, libSceLibcInternalBase + 0x8B1A0); //strcpy
+            ps4.WriteMemory(pid, GetUsersAddr + 0x31, libSceLibcInternalBase + 0x000C0A40); //strcpy
 
 
             var users = GetUsers();
