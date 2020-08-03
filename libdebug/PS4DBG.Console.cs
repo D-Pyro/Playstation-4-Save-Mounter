@@ -3,7 +3,7 @@ using System.Text;
 namespace libdebug
 {
     public partial class PS4DBG
-    {   
+    {
         //console
         // packet sizes
         // send size

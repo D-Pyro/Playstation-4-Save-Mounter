@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PS4Saves
+﻿namespace PS4Saves
 {
     class offsets
     {

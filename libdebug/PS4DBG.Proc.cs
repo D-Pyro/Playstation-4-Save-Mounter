@@ -30,7 +30,7 @@ namespace libdebug
         private const int PROC_CALL_SIZE = 12;
         private const int PROC_PROC_INFO_SIZE = 188;
         private const int PROC_ALLOC_SIZE = 8;
-    
+
 
         /// <summary>
         /// Get current process list
@@ -166,8 +166,8 @@ namespace libdebug
             CMDPacket packet = new CMDPacket
             {
                 magic = CMD_PACKET_MAGIC,
-                cmd = (uint) CMDS.CMD_PROC_CALL,
-                datalen = (uint) CMD_PROC_CALL_PACKET_SIZE
+                cmd = (uint)CMDS.CMD_PROC_CALL,
+                datalen = (uint)CMD_PROC_CALL_PACKET_SIZE
             };
             SendData(GetBytesFromObject(packet), CMD_PACKET_SIZE);
 
@@ -434,7 +434,7 @@ namespace libdebug
                     break;
                 default:
                     throw new NotSupportedException("Requested scan value type is not supported! (Feed in Byte[] instead.)");
-                    
+
             }
             // send packet
             SendCMDPacket(CMDS.CMD_PROC_SCAN, CMD_PROC_SCAN_PACKET_SIZE, pid, (byte)valueType, (byte)compareType, (int)(extraValue == null ? typeLength : typeLength * 2));
@@ -452,10 +452,10 @@ namespace libdebug
             int save = sock.ReceiveTimeout;
             sock.ReceiveTimeout = Int32.MaxValue;
             List<ulong> results = new List<ulong>();
-            while(true)
+            while (true)
             {
                 ulong result = BitConverter.ToUInt64(ReceiveData(sizeof(ulong)), 0);
-                if(result == 0xFFFFFFFFFFFFFFFF)
+                if (result == 0xFFFFFFFFFFFFFFFF)
                 {
                     break;
                 }
@@ -550,7 +550,7 @@ namespace libdebug
 
                 return (T)(object)str;
             }
-            
+
             if (typeof(T) == typeof(byte[]))
             {
                 throw new NotSupportedException("byte arrays are not supported, use ReadMemory(int pid, ulong address, int size)");
@@ -572,7 +572,7 @@ namespace libdebug
                 WriteMemory(pid, address, (byte[])(object)value);
                 return;
             }
-            
+
             WriteMemory(pid, address, GetBytesFromObject(value));
         }
     }

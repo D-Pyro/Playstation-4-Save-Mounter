@@ -1,12 +1,10 @@
 ﻿using libdebug;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace PS4Saves
@@ -26,7 +24,7 @@ namespace PS4Saves
         private string selectedGame = null;
         string mp = "";
         bool log = false;
-        
+
         public Main()
         {
             InitializeComponent();
@@ -55,7 +53,7 @@ namespace PS4Saves
             }
             else
             {
-                value = size /BytesInGigabytes;
+                value = size / BytesInGigabytes;
                 str = "GB";
             }
             return String.Format("{0:0.##} {1}", value, str);
@@ -70,7 +68,7 @@ namespace PS4Saves
         }
         private void WriteLog(string msg)
         {
-            if(log)
+            if (log)
             {
 
                 msg = $"|{msg}|";
@@ -120,6 +118,7 @@ namespace PS4Saves
                     throw new Exception();
                 }
                 SetStatus("Connected");
+                setupButton.Enabled = true;
                 if (!File.Exists("ip"))
                 {
                     File.WriteAllText("ip", ipTextBox.Text);
@@ -187,12 +186,12 @@ namespace PS4Saves
             libSceLibcInternalBase = (ulong)tmp;
             stub = pm.FindEntry("(NoName)clienthandler") == null ? ps4.InstallRPC(pid) : pm.FindEntry("(NoName)clienthandler").start;
 
-            
+
 
             var ret = ps4.Call(pid, stub, libSceSaveDataBase + offsets.sceSaveDataInitialize3);
             WriteLog($"sceSaveDataInitialize3 ret = 0x{ret:X}");
-            
-           
+
+
             //PATCHES
             //SAVEDATA LIBRARY PATCHES
             ps4.WriteMemory(pid, libSceSaveDataBase + 0x00038AE8, (byte)0x00); // 'sce_' patch
@@ -203,16 +202,19 @@ namespace PS4Saves
             var s = l.FindProcess("SceShellCore");
             var m = ps4.GetProcessMaps(s.pid);
             var ex = m.FindEntry("executable");
-            
+
             //SHELLCORE PATCHES
             ps4.WriteMemory(s.pid, ex.start + 0x01600060, (byte)0x00); // 'sce_sdmemory' patch
-            ps4.WriteMemory(s.pid, ex.start + 0x0087F840, new byte[]{0x48, 0x31, 0xC0, 0xC3}); //verify keystone patch
-            ps4.WriteMemory(s.pid, ex.start + 0x00071130, new byte[] {0x31, 0xC0, 0xC3}); //transfer mount permission patch eg mount foreign saves with write permission
+            ps4.WriteMemory(s.pid, ex.start + 0x01600068, (byte)0x00); // 'sce_sdmemory1' patch
+            ps4.WriteMemory(s.pid, ex.start + 0x01600070, (byte)0x00); // 'sce_sdmemory2' patch
+            ps4.WriteMemory(s.pid, ex.start + 0x01600078, (byte)0x00); // 'sce_sdmemory3' patch
+            ps4.WriteMemory(s.pid, ex.start + 0x0087F840, new byte[] { 0x48, 0x31, 0xC0, 0xC3 }); //verify keystone patch
+            ps4.WriteMemory(s.pid, ex.start + 0x00071130, new byte[] { 0x31, 0xC0, 0xC3 }); //transfer mount permission patch eg mount foreign saves with write permission
             ps4.WriteMemory(s.pid, ex.start + 0x000D6830, new byte[] { 0x31, 0xC0, 0xC3 });//patch psn check to load saves saves foreign to current account
             ps4.WriteMemory(s.pid, ex.start + 0x0007379E, new byte[] { 0x90, 0x90 }); // ^
-            ps4.WriteMemory(s.pid, ex.start + 0x00070C38, new byte[] {0x90, 0x90, 0x90, 0x90, 0x90, 0x90}); // something something patches... 
+            ps4.WriteMemory(s.pid, ex.start + 0x00070C38, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }); // something something patches... 
             ps4.WriteMemory(s.pid, ex.start + 0x00070855, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }); // don't even remember doing this
-            ps4.WriteMemory(s.pid, ex.start + 0x00070054, new byte[] { 0x90, 0x90}); //nevah jump
+            ps4.WriteMemory(s.pid, ex.start + 0x00070054, new byte[] { 0x90, 0x90 }); //nevah jump
             ps4.WriteMemory(s.pid, ex.start + 0x00070260, new byte[] { 0x90, 0xE9 }); //always jump
             //WRITE CUSTOM FUNCTIONS
             GetSaveDirectoriesAddr = ps4.AllocateMemory(pid, 0x8000);
@@ -233,6 +235,8 @@ namespace PS4Saves
             userComboBox.DataSource = users;
 
             SetStatus("Setup Done :)");
+            userComboBox.Enabled = true;
+            getGamesButton.Enabled = true;
         }
 
         private void searchButton_Click(object sender, EventArgs e)
@@ -260,7 +264,7 @@ namespace PS4Saves
                 return;
             }
             var dirNameAddr = ps4.AllocateMemory(pid, Marshal.SizeOf(typeof(SceSaveDataDirName)) * 1024 + 0x10 + Marshal.SizeOf(typeof(SceSaveDataParam)) * 1024);
-            var titleIdAddr = dirNameAddr + (uint) Marshal.SizeOf(typeof(SceSaveDataDirName)) * 1024;
+            var titleIdAddr = dirNameAddr + (uint)Marshal.SizeOf(typeof(SceSaveDataDirName)) * 1024;
             var paramAddr = titleIdAddr + 0x10;
             SceSaveDataDirNameSearchCond searchCond = new SceSaveDataDirNameSearchCond
             {
@@ -279,6 +283,8 @@ namespace PS4Saves
             if (dirsComboBox.Items.Count > 0)
             {
                 SetStatus($"Found {dirsComboBox.Items.Count} Save Directories :D");
+                dirsComboBox.Enabled = true;
+                mountButton.Enabled = true;
             }
             else
             {
@@ -334,6 +340,15 @@ namespace PS4Saves
             if (mp != "")
             {
                 SetStatus($"Save Mounted in {mp}");
+                unmountButton.Enabled = true;
+                setupButton.Enabled = false;
+                userComboBox.Enabled = false;
+                getGamesButton.Enabled = false;
+                gamesComboBox.Enabled = false;
+                searchButton.Enabled = false;
+                dirsComboBox.Enabled = false;
+                mountButton.Enabled = false;
+
             }
             else
             {
@@ -361,6 +376,14 @@ namespace PS4Saves
             Unmount(mountPoint);
             mp = null;
             SetStatus("Save Unmounted");
+            unmountButton.Enabled = false;
+            setupButton.Enabled = true;
+            userComboBox.Enabled = true;
+            getGamesButton.Enabled = true;
+            gamesComboBox.Enabled = true;
+            searchButton.Enabled = true;
+            dirsComboBox.Enabled = true;
+            mountButton.Enabled = true;
         }
 
         private void createButton_Click(object sender, EventArgs e)
@@ -406,7 +429,7 @@ namespace PS4Saves
             {
                 userId = GetUser(),
                 dirName = dirNameAddr,
-                blocks = (ulong) sizeTrackBar.Value,
+                blocks = (ulong)sizeTrackBar.Value,
                 mountMode = 4 | 2 | 8,
                 titleId = titleIdAddr,
                 fingerprint = fingerprintAddr
@@ -436,11 +459,11 @@ namespace PS4Saves
 
         private int GetUser()
         {
-            if(user != 0)
+            if (user != 0)
             {
                 return user;
             }
-            return InitialUser();          
+            return InitialUser();
         }
 
         private int InitialUser()
@@ -465,7 +488,7 @@ namespace PS4Saves
             ps4.WriteMemory(pid, searchResultAddr, searchResult);
             var ret = ps4.Call(pid, stub, libSceSaveDataBase + offsets.sceSaveDataDirNameSearch, searchCondAddr, searchResultAddr);
             WriteLog($"sceSaveDataDirNameSearch ret = 0x{ret:X}");
-            if ( ret == 0)
+            if (ret == 0)
             {
                 searchResult = ps4.ReadMemory<SceSaveDataDirNameSearchResult>(pid, searchResultAddr);
                 SearchEntry[] sEntries = new SearchEntry[searchResult.hitNum];
@@ -547,7 +570,7 @@ namespace PS4Saves
             detailsTextBox.Text = ((SearchEntry)dirsComboBox.SelectedItem).detail;
             dateTextBox.Text = ((SearchEntry)dirsComboBox.SelectedItem).time;
         }
-        
+
         private void userComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             user = ((User)userComboBox.SelectedItem).id;
@@ -590,7 +613,7 @@ namespace PS4Saves
             List<User> users = new List<User>();
             var mem = ps4.AllocateMemory(pid, 0x1);
             var ret = (int)ps4.Call(pid, stub, GetUsersAddr, mem);
-            
+
             if (ret != -1 && ret != 0)
             {
                 var buffer = ps4.ReadMemory(pid, mem, (21) * 4);
@@ -629,7 +652,7 @@ namespace PS4Saves
                     var buffer = new byte[stream.Length];
                     stream.Read(buffer, 0, buffer.Length);
                     var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    IAsyncResult result = socket.BeginConnect(new IPEndPoint(IPAddress.Parse(ipTextBox.Text), 9020), null, null);
+                    IAsyncResult result = socket.BeginConnect(new IPEndPoint(IPAddress.Parse(ipTextBox.Text), 9021), null, null);
                     var connected = result.AsyncWaitHandle.WaitOne(3000);
                     if (connected)
                     {
@@ -666,6 +689,8 @@ namespace PS4Saves
             }
             var dirs = GetSaveDirectories();
             gamesComboBox.DataSource = dirs;
+            gamesComboBox.Enabled = true;
+            searchButton.Enabled = true;
         }
 
         private void gamesComboBox_SelectedIndexChanged(object sender, EventArgs e)

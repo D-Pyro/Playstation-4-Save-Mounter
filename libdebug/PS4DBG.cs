@@ -208,8 +208,8 @@ namespace libdebug
             CMDPacket packet = new CMDPacket
             {
                 magic = CMD_PACKET_MAGIC,
-                cmd = (uint) cmd,
-                datalen = (uint) length
+                cmd = (uint)cmd,
+                datalen = (uint)length
             };
 
             byte[] data = null;

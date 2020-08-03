@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Playstation 4 Save Mounter")]
+[assembly: AssemblyTitle("PlayStation 4 Save Mounter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PS4Saves")]
+[assembly: AssemblyProduct("PlayStation 4 Save Mounter")]
 [assembly: AssemblyCopyright("Copyright ©  2018 Aida & ChendoChap")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
