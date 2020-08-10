@@ -196,7 +196,7 @@ namespace PS4Saves
             //SAVEDATA LIBRARY PATCHES
             ps4.WriteMemory(pid, libSceSaveDataBase + 0x00038AE8, (byte)0x00); // 'sce_' patch
             ps4.WriteMemory(pid, libSceSaveDataBase + 0x000377D9, (byte)0x00); // 'sce_sdmemory' patch
-            ps4.WriteMemory(pid, libSceSaveDataBase + 0x00000ED7, (byte)0x30); // '_' patch
+            ps4.WriteMemory(pid, libSceSaveDataBase + 0x00000ED9, (byte)0x30); // '_' patch
 
             var l = ps4.GetProcessList();
             var s = l.FindProcess("SceShellCore");
@@ -205,9 +205,6 @@ namespace PS4Saves
 
             //SHELLCORE PATCHES
             ps4.WriteMemory(s.pid, ex.start + 0x01600060, (byte)0x00); // 'sce_sdmemory' patch
-            ps4.WriteMemory(s.pid, ex.start + 0x01600068, (byte)0x00); // 'sce_sdmemory1' patch
-            ps4.WriteMemory(s.pid, ex.start + 0x01600070, (byte)0x00); // 'sce_sdmemory2' patch
-            ps4.WriteMemory(s.pid, ex.start + 0x01600078, (byte)0x00); // 'sce_sdmemory3' patch
             ps4.WriteMemory(s.pid, ex.start + 0x0087F840, new byte[] { 0x48, 0x31, 0xC0, 0xC3 }); //verify keystone patch
             ps4.WriteMemory(s.pid, ex.start + 0x00071130, new byte[] { 0x31, 0xC0, 0xC3 }); //transfer mount permission patch eg mount foreign saves with write permission
             ps4.WriteMemory(s.pid, ex.start + 0x000D6830, new byte[] { 0x31, 0xC0, 0xC3 });//patch psn check to load saves saves foreign to current account
